@@ -15,9 +15,13 @@ class Statement
 {
     public:
         Statement();
-        void read();// read funtion for transaction object's
-        void compute_balances();
+        void read();         // read funtion for transaction object's
+        void get_balances();
+        double total_balances();
+        double get_transactions_total(int day);
         void print() ;
+        double get_average_dailey_rate();
+        double get_minimum_dailey_rate(const std::vector<double> &v);
         double get_average_dailey_balance();
         double get_minimum_dailey_balance(const std::vector<double> &v);
 
