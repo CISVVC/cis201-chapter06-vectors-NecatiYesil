@@ -31,29 +31,18 @@ void Statement::read() // read function for transaction class object's
             more = false;
     }
 
-    get_balances();
+    balance(transactions);
 }
 
-void Statement::get_balances() //Computes the dailey balances
+std::vector<double> Statement::balance(std::vector<Transaction> &v) //Computes the dailey balances
 {
     double balance = 0.0;
-    for(int i = 0; i < transactions.size(); i++)
-    {
-        balance += transactions[i].get_amount();
-        dailey_balances.push_back(balance);
-    }
-    
-}
-
-
-double Statement::total_balances() //Computes the dailey balances
-{
-    double total = 0.0;
     for(int i = 0; i < MAX_DAY; i++)
-    {
-        total += get_transactions_total(i + 1);
-    }
-    return total;
+        {
+            balance += get_transactions_total(i +1);
+            dailey_balances.push_back(balance);
+        }
+    return dailey_balances;
 }
 
 double Statement::get_transactions_total(int day)
@@ -61,7 +50,7 @@ double Statement::get_transactions_total(int day)
    double total = 0.0;
    for(int i = 0; i < transactions.size(); i++)
    {
-        if(day != transactions[i].get_day())
+        if(day == transactions[i].get_day())
         {
             total += transactions[i].get_amount();
         }
@@ -72,34 +61,47 @@ double Statement::get_transactions_total(int day)
 
 void Statement::print() //prints the dailey balance, average and minimum interest.
 {
-    for(int i = 0; i < transactions.size(); i++)
+    int x = 0;
+    for(int i = 0; i < MAX_DAY; i++)
     {
-        transactions[i].print();
-        std::cout << "Balance: " << dailey_balances[i] << std::endl;
+        while(i+1 == transactions[x].get_day()) 
+        {
+            transactions[x].print();
+            x++;
+        }
+        std::cout << "Balance on day " << i+1 << ": "<< dailey_balances[i] << std::endl;
     }
     std::cout << "\n###################################" << std::endl;
-    std::cout << "Average daily balance: " << get_average_dailey_balance() 
-              << "  Interest: " << get_average_dailey_rate() << std::endl;
+    std::cout << "Average daily balance: " << get_average_dailey_balance(dailey_balances) 
+              << "  Interest: " << get_average_dailey_rate(dailey_balances) << std::endl;
     std::cout << "Minimum daily balance: " << get_minimum_dailey_balance(dailey_balances)
               << "  Interest: " << get_minimum_dailey_rate(dailey_balances)
               << std::endl << "###################################" << std::endl;
 }
 
-double Statement::get_average_dailey_rate() //computes the average dailey interest
+double Statement::get_average_dailey_rate(const std::vector<double> &v) //computes the average dailey interest
 {
-    return (total_balances() / (2*MAX_DAY))*INTEREST_RATE;
+    double sum = 0.0;
+    for( int i = 0; i < MAX_DAY; i++)
+        sum += v[i];
+
+    return (sum / MAX_DAY)*INTEREST_RATE;
 }
 
-double Statement::get_average_dailey_balance() //computes the average dailey balance
+double Statement::get_average_dailey_balance(const std::vector<double> &v) //computes the average dailey balance
 {
-    return total_balances() / (2*MAX_DAY);
+    double sum = 0.0;
+    for( int i = 0; i < MAX_DAY; i++)
+        sum += v[i];
+
+    return sum / MAX_DAY;
 }
 
 double Statement::get_minimum_dailey_rate(const std::vector<double> &v) //computes the min
 //dailey interest
 {
     double min_balance = v[0];
-    for(int i = 0; i < transactions.size(); i++)
+    for(int i = 0; i < MAX_DAY; i++)
     {
         if(v[i] < min_balance)
             min_balance = v[i];
@@ -111,7 +113,7 @@ double Statement::get_minimum_dailey_balance(const std::vector<double> &v) //com
 //dailey balance
 {
     double min_balance = v[0];
-    for(int i = 0; i < transactions.size(); i++)
+    for(int i = 0; i < MAX_DAY; i++)
     {
         if(v[i] < min_balance)
             min_balance = v[i];
